@@ -1,0 +1,26 @@
+{
+    "id": "481F9EEB",
+    "path": "~/Documents/chip_and_atac-seq/ChIP_and_ATAC-seq/3_diffbind_merged.R",
+    "project_path": "3_diffbind_merged.R",
+    "type": "r_source",
+    "hash": "1622059644",
+    "contents": "",
+    "dirty": false,
+    "created": 1656008212234.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "178,0",
+        "scrollLine": "165"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1656059401,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1656059401451,
+    "read_only": false,
+    "read_only_alternatives": []
+}

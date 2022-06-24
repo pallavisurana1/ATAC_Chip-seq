@@ -1,0 +1,26 @@
+{
+    "id": "7F238A2A",
+    "path": "~/Documents/k/projects/Matei_lab/chip_cut_run/scripts/6a_chipseeker_annotation_ATAC.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1656048170617.0,
+    "source_on_save": false,
+    "relative_order": 10,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "151,2",
+        "scrollLine": "140"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1639283780,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1639283780,
+    "read_only": false,
+    "read_only_alternatives": []
+}

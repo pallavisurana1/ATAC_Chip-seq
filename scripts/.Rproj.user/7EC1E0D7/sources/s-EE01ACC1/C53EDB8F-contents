@@ -1,0 +1,6 @@
+
+library(GenomicRanges)
+library(BiocParallel)
+library(ChIPpeakAnno)
+
+x = ChIPpeakAnno::findOverlapsOfPeaks(gr1, gr2, gr3)

@@ -1,0 +1,7 @@
+﻿SampleID,Tissue,Factor,Condition,Replicate,bamReads,Peaks,PeakCaller
+FTO1,multiple,FTO,knockout,1,/home/psurana/projects/atac/FTO_PCDH/data/sorted_Position_bam/PosSort_FTO-1_S17_R1_001_sorted.bam,/home/psurana/projects/atac/FTO_PCDH/data/genrich_peakcalls/FTO-1_S17_R1_001_sorted.narrowPeak,narrow
+FTO2,multiple,FTO,knockout,2,/home/psurana/projects/atac/FTO_PCDH/data/sorted_Position_bam/PosSort_FTO-2_S20_R1_001_sorted.bam,/home/psurana/projects/atac/FTO_PCDH/data/genrich_peakcalls/FTO-2_S20_R1_001_sorted.narrowPeak,narrow
+FTO3,multiple,FTO,knockout,3,/home/psurana/projects/atac/FTO_PCDH/data/sorted_Position_bam/PosSort_FTO-3_S23_R1_001_sorted.bam,/home/psurana/projects/atac/FTO_PCDH/data/genrich_peakcalls/FTO-3_S23_R1_001_sorted.narrowPeak,narrow
+PCDH1,multiple,PCDH,control,1,/home/psurana/projects/atac/FTO_PCDH/data/sorted_Position_bam/PosSort_PCDH-1_S16_R1_001_sorted.bam,/home/psurana/projects/atac/FTO_PCDH/data/genrich_peakcalls/PCDH-1_S16_R1_001_sorted.narrowPeak,narrow
+PCDH2,multiple,PCDH,control,2,/home/psurana/projects/atac/FTO_PCDH/data/sorted_Position_bam/PosSort_PCDH-2_S19_R1_001_sorted.bam,/home/psurana/projects/atac/FTO_PCDH/data/genrich_peakcalls/PCDH-2_S19_R1_001_sorted.narrowPeak,narrow
+PCDH3,multiple,PCDH,control,3,/home/psurana/projects/atac/FTO_PCDH/data/sorted_Position_bam/PosSort_PCDH-3_S22_R1_001_sorted.bam,/home/psurana/projects/atac/FTO_PCDH/data/genrich_peakcalls/PCDH-3_S22_R1_001_sorted.narrowPeak,narrow
