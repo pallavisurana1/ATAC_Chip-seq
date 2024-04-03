@@ -1,184 +1,117 @@
-#! /bin/bash
+#!/bin/bash
 set -euo pipefail
 
-# # scripts already stored in scripts dir
-
-#- nohup bash 1_sra_to_bam.sh &> out/6_bam2dups.out &
-
-##- total 23 files
-
-##* make dirs
-# mkdir -p results/{bams,fastqc,motifs,peaks}
-# #mkdir -p hg38
-# mkdir -p input
-
-# conda activate atac-seq
-
-##--------------------------------------------------------------------------
-
-# the reference file path, change to where you put the reference
-WDIR="/home/psurana/projects/Matei_lab/chip_cut_run/"
+# Initialize directories and reference paths
+WDIR="/home/psurana/projects/Matei_lab/ofkar_DP_DN/data/"
 REF="/home/psurana/projects/Matei_lab/bowtie2/hg38"
-RES="/home/psurana/projects/Matei_lab/chip_cut_run/data/res"
-DATA_DIR="/home/psurana/projects/Matei_lab/chip_cut_run/data/raw/"
+RES="${WDIR}/res"
+DATA_DIR="${WDIR}/raw/fastq"
 
-## extract the fastq files - not needed as fastq files are provided
-# fasterq-dump $SRA
+# Function to run FastQC and MultiQC
+run_qc() {
+    local dir=$1
+    local out_dir=$2
+    local qc_report=$3
+    fastqc "$dir"/*.fastq.gz -o "$out_dir"
+    cd "$out_dir"
+    export LC_ALL=en_US.utf-8
+    export LANG=en_US.utf-8
+    multiqc . -o "$qc_report"
+}
 
+# Create directories
+mkdir -p ${RES}/{bams,fastqc,motifs,peaks}
 
-# ##---------------------------------------------------------------------------
-
-# #* step1, quality control of the fastq files
-# echo "Fastqc quality control usually  takes long -- Be patient..."
-# cd ${DATA_DIR}
-# fastqc *.fastq.gz -o $RES/fastqc
-
-# # ##---------------------------------------------------------------------------
-
-# ##* step 1a, combine all fastqc reports using multiqc
-# export LC_ALL=en_US.utf-8
-# export LANG=en_US.utf-8
-# cd ${RES}/fastqc/1_pre_trim/ 
-# multiqc . -o pre_multiqc.html
-
-##---------------------------------------------------------------------------
-
-# ##* step 1b, Adapter trimming - Nextera transposase here
-# # took over an hour here i think
-# cd ${DATA_DIR}
-# for i in *.fastq.gz; 
-# do 
-# cutadapt --minimum-length 20 -a CTGTCTCTTATACACATCT -o ${RES}/trim_fq/${i} $i
-# done
-# echo "Trimming of adapters done by cutadapt"
-
-# ##* step 1c, run fastqc again and see if adapters have gone!
-# cd ${RES}/trim_fq
-# fastqc *.fastq.gz -o $RES/fastqc/2_post_trim/
-
-# export LC_ALL=en_US.utf-8
-# export LANG=en_US.utf-8
-
-# cd ${RES}/fastqc/2_post_trim/
-# multiqc . -o post_multiqc.html
-
-# ##---------------------------------------------------------------------------
-
-# ##* step2, align the reads with bowtie2
-
-# for sample in `ls /home/psurana/projects/Matei_lab/chip_cut_run/data/res/trim_fq/*.fastq.gz`
-# do
-# dir="/home/psurana/projects/Matei_lab/chip_cut_run/data/res/trim_fq"
-# res="/home/psurana/projects/Matei_lab/chip_cut_run/data/res/sams"
-# base=$(basename $sample "_001.fastq.gz")
-# bowtie2 -x ${REF}/hg38 -U ${dir}/${base}_001.fastq.gz -S ${res}/${base}.sam --no-unal
-# done
-# mv *.sam ${RES}/sams/
+# Activate bioinformatics environment
+conda activate bioinfo
 
 ##-----------------------------------------------------------------------------
 
-# conda activate rna-seq
+# Pre-trim quality control
+run_qc "${DATA_DIR}" "${RES}/fastqc" "pre_multiqc.html"
 
-# java -jar ./anaconda3/pkgs/picard-2.18.29-0/share/picard-2.18.29-0/picard.jar
+##-----------------------------------------------------------------------------
+# Adapter trimming
+cd "${DATA_DIR}"
+for i in *.fastq.gz; do
+    cutadapt --minimum-length 20 -a CTGTCTCTTATACACATCT -o "${RES}/trim_fq/$i" $i
+done
 
-#- validate sam file
-# cd ${RES}/sams/
+# Post-trim quality control
+run_qc "${RES}/trim_fq" "${RES}/fastqc/post_trim/" "post_multiqc.html"
 
-# f=(*sam)
-# echo "${f[0]}"
+##-----------------------------------------------------------------------------
 
-# for i in {0..21}
-# do
-# picard -Xmx5g ValidateSamFile I=${f[i]} M=SUMMARY O=${f[i]}.txt
-# done
-
-# picard -Xmx5g ValidateSamFile I=${f[0]} M=VERBOSE O=${f[0]}.txt
-
-#------------------------------------------------------------------------------
-
-# ##* step 3a, convert sam to bam, and index the bam
-
-#------------------------------------------------------------------------------
-## ref
-## sed '/chrM/d;/random/d;/chrUn/d;/EBV/d' < OV5-DN-1_S4.sam  > filter_OV5-DN-1_S4.sam 
-## samtools sort filter_OV5-DN-1_S4.sam -o filter_OV5-DN-1_S4.bam
-## samtools index filter_OV5-DN-1_S4.bam
-## #- check
-## samtools idxstats filter_OV5-DN-1_S4.bam| cut -f 1 
-#------------------------------------------------------------------------------
-
-# ##* step 3a, convert sam to bam, and index the bam
-
-#--- remove other chromosomes
-# cd ${RES}/sams/
-# for i in *.sam; 
-# do
-# sed '/chrM/d;/random/d;/chrUn/d;/EBV/d' < ${i} > ${i}_filtered.sam
-# done
+# Read alignment using Bowtie2
+cd "${RES}/trim_fq"
+for sample in *.fastq.gz; do
+    base=$(basename "$sample" "_R1_001.fastq.gz")
+    bowtie2 -x ${REF}/hg38 -U ${sample} -S ${base}.sam
+done
+mv *.sam ${RES}/sams/
 
 
-# mkdir filtered_sam
-# mv *.sam_filtered.sam filtered_sam/
+##-----------------------------------------------------------------------------
 
-# #--- filter sam file 
-# cd ${RES}/sams/filtered_sam
-# for i in *.sam_filtered.sam; 
-# do
-# samtools sort $i -o ${RES}/bams/$i.bam
-# done
+# Function for SAM validation using Picard
+validate_sam() {
+    cd ${SAMS_DIR}
+    for sam_file in OV5-DN-1_S4 OV5-DN-2_S5 OV5-DN-3_S6 OV5-DP-1_S1 OV5-DP-2_S2 OV5-DP-3_S3; do
+        picard -Xmx5g ValidateSamFile I=${sam_file}.sam M=SUMMARY O=${sam_file}.txt
+    done
+}
 
+##-----------------------------------------------------------------------------
 
-# cd ${RES}/bams/
-# for i in *.bam;
-# do
-# samtools index $i
-# done
+# Function for filtering, sorting, and indexing SAM/BAM files
+process_sam_bam() {
+    cd ${SAMS_DIR}
+    
+    # Remove unwanted chromosomes and create filtered SAM files
+    for sam in *.sam; do
+        sed '/chrM/d;/random/d;/chrUn/d;/EBV/d' < ${sam} > ${sam}_filtered.sam
+    done
+    
+    # Sort and convert to BAM, then index
+    cd ${SAMS_DIR}/filtered_sam
+    for filtered_sam in *.sam_filtered.sam; do
+        samtools sort $filtered_sam -o ${BAMS_DIR}/${filtered_sam}.bam
+        samtools index ${BAMS_DIR}/${filtered_sam}.bam
+    done
+    
+    # Rename files for cleaner names
+    cd ${BAMS_DIR}
+    for f in *.sam_filtered.sam.bam; do
+        mv -- "$f" "${f%.sam_filtered.sam.bam}.bam"
+    done
+    for f in *.sam_filtered.sam.bam.bai; do
+        mv -- "$f" "${f%.sam_filtered.sam.bam.bai}.bam.bai"
+    done
+}
 
-# #- rename file extensions
-# for f in *.sam_filtered.sam.bam; 
-# do 
-#     mv -- "$f" "${f%.sam_filtered.sam.bam}.bam"
-# done
-# for f in *.sam_filtered.sam.bam.bai; 
-# do 
-#     mv -- "$f" "${f%.sam_filtered.sam.bam.bai}.bam.bai"
-# done
+##-----------------------------------------------------------------------------
 
+# Function for marking duplicates and calculating statistics
+mark_and_stats() {
+    cd ${BAMS_DIR}
+    for bam in *.bam; do
+        picard -Xmx5g MarkDuplicates I=${bam} O=${bam}_duplicates.bam M=${bam}_dup_metrics.txt
+        samtools flagstat ${bam}_duplicates.bam > ${BAMS_DIR}/bam_stat/${bam}_duplicates.stat
+    done
+}
 
-# ##---------------------------------------------------------------------------
+##-----------------------------------------------------------------------------
 
-#- 3b, remove duplciates in chip seq datasets, calculate and print statistics of alignment
-#- calculate the dups
+# Validate SAM files
+validate_sam
 
-# # conda activate rna-seq
-# cd ${RES}/bams/
-# for i in *.bam ; do 
-#     picard -Xmx5g MarkDuplicates I=${i} O=${RES}/bams/dups_removed/${i}_duplicates.bam M=${i}_dup_metrics.txt REMOVE_SEQUENCING_DUPLICATES=true VALIDATION_STRINGENCY=LENIENT
-# done
+# Process SAM to filtered, sorted, and indexed BAM
+process_sam_bam
 
+# Mark duplicates and calculate stats
+mark_and_stats
 
-# ##---------------------------------------------------------------------------
+# End of script
 
-
-#- samtools - alignment stats to see if the bam file should be cleaned further
-
-# for f in *.bam_duplicates.bam; 
-# do 
-#     mv -- "$f" "${f%.bam_duplicates.bam}_duplicates.bam"
-# done
-
-# cd ${RES}/bams/dups_removed
-# for i in *.bam ; do 
-#     samtools flagstat "$i" > ${RES}/bams/dup_bam_stat/"$i".stat
-# done
-
-# cd ${RES}/bams/dups_removed
-# for i in *.bam;
-# do
-# samtools index $i
-# done
-
-# #-overall looks good
-# ##---------------------------------------------------------------------------
-
-# ## ----- end of script ------
+##-----------------------------------------------------------------------------
+##-----------------------------------------------------------------------------
